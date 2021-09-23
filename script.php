@@ -3,6 +3,7 @@ require 'vendor/autoload.php';
 
 use App\CommissionTask\Service\CommissionService;
 use App\CommissionTask\Repositories\TransactionsRepository;
+use App\CommissionTask\Repositories\ExchangeRatesRepository;
 
 $inputFile = $argv[1];
 
@@ -11,11 +12,16 @@ if (!file_exists($inputFile)) {
 }
 
 echo "Importing file...\n";
-$respository = TransactionsRepository::getInstance();
-$respository->loadCsv($inputFile);
+$transactionsRespository = TransactionsRepository::getInstance();
+$transactionsRespository->loadCsv($inputFile);
+
+$exchangeRatesRepository = ExchangeRatesRepository::getInstance();
+$exchangeRatesRepository->importFromSource(config('exchange_rates.source_urls'));
+// $exchangeRatesRepository->saveData('USD', 1.1497);
+// $exchangeRatesRepository->saveData('JPY', 129.53);
 
 echo "Calculating...\n";
-$commissionService = new CommissionService($respository);
+$commissionService = new CommissionService($transactionsRespository, $exchangeRatesRepository);
 $results = $commissionService->calculate();
 
 // Uncomment to save data to repository

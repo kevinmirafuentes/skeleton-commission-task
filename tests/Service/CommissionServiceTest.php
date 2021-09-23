@@ -7,6 +7,7 @@ namespace App\CommissionTask\Tests\Service;
 use PHPUnit\Framework\TestCase;
 use App\CommissionTask\Service\CommissionService;
 use App\CommissionTask\Repositories\TransactionsRepository;
+use App\CommissionTask\Repositories\ExchangeRatesRepository;
 
 class CommissionServiceTest extends TestCase
 {
@@ -14,17 +15,24 @@ class CommissionServiceTest extends TestCase
     {
         $input = __DIR__ . '/../../input.csv';
 
-        $respository = TransactionsRepository::getInstance();
-        $respository->loadCsv($input);
+        $transactionsRespository = TransactionsRepository::getInstance();
+        $transactionsRespository->loadCsv($input);
 
-        $commissionService = new CommissionService($respository);
+        $exchangeRatesRepository = ExchangeRatesRepository::getInstance();
+        // $exchangeRatesRepository->importFromSource(config('exchange_rates.source_urls'));
+
+        $exchangeRatesRepository->saveData('USD', 1.1497);
+        $exchangeRatesRepository->saveData('JPY', 129.53);
+
+
+        $commissionService = new CommissionService($transactionsRespository, $exchangeRatesRepository);
         $results = $commissionService->calculate();
 
         // saves data to repository
         foreach ($results as $index => $data) {
-            $respository->setData($index, $data);
+            $transactionsRespository->setData($index, $data);
         }
-        $commissions = $respository->getCommissions();
+        $commissions = $transactionsRespository->getCommissions();
         
         $this->assertEquals($commissions[0], 0.60);
         $this->assertEquals($commissions[1], 3.00);

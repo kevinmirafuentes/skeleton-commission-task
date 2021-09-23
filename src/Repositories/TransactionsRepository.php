@@ -1,19 +1,11 @@
 <?php 
 namespace App\CommissionTask\Repositories;
 
-class TransactionsRepository 
+class TransactionsRepository
 {
+    use SingletonRepository;
+
     private $data;
-
-    public static $instance;
-
-    public static function getInstance()
-    {
-        if (!self::$instance) {
-            self::$instance = new self;
-        }
-        return self::$instance;
-    }
 
     public function loadCsv($csv) 
     {
