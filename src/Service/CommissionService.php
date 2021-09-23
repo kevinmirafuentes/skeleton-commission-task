@@ -11,10 +11,6 @@ class CommissionService
 {
     private $weeklyWithdrawalsEur = [];
 
-    private $baseCurrency = 'EUR';
-
-    public $exchangeRates = [];
-
     public $transactionsRepository;
 
     public $exchangeRatesRepository;
@@ -66,7 +62,7 @@ class CommissionService
         // Calculate for private user type
 
         $amount = $data['amount'];
-        if ($data['currency'] != $this->baseCurrency) {
+        if ($data['currency'] != config('exchange_rates.base')) {
             $amount = $this->exchangeRatesRepository->convert($amount, $data['currency']);
         }
 
@@ -100,7 +96,7 @@ class CommissionService
 
                 // conditions above calculates in base (EUR) currency
                 // so we convert it back to original currency
-                if ($data['currency'] != $this->baseCurrency) {
+                if ($data['currency'] != config('exchange_rates.base')) {
                     return $commission * $this->exchangeRatesRepository->find($data['currency']);
                 }
 
